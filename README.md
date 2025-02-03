@@ -66,7 +66,8 @@ See instructions at [SETUP-KAFKA.md] to:
 
 ## Task 5. Customize JSON Producer
 
-Make customizations to the JSON Producer. I modified this code to use polars. I wanted to try using polars to read and handle the JSON data. I adjusted the generate_messages fucntion to utilize polars with the following: 
+Make customizations to the JSON Producer. I modified this code to use polars. I wanted to try using polars to read and handle the JSON data. I adjusted the generate_messages function to utilize polars with the following: 
+
 ```zsh
 def generate_messages(file_path: pathlib.Path):
     while True:
@@ -109,7 +110,26 @@ python3 -m consumers.json_consumer_stonerogers
 
 ## Task 7. Customize CSV Producer
 
-Make customizations to the CSV Producer. I modified in the following way: 
+Make customizations to the CSV Producer. I again modified this code to use polars to read and handle the CSV data. I adjusted the generate_messages function to utilize polars with the following: 
+
+```zsh
+def generate_messages(file_path: pathlib.Path):
+    """
+    Read from a csv file and yield records one by one, using polars.
+
+    Args:
+        file_path (pathlib.Path): Path to the CSV file.
+
+    Yields:
+        str: CSV row formatted as a string.
+    """
+    while True:
+        try:
+            logger.info(f"Opening data file in read mode: {DATA_FILE}")
+            df = pl.read_csv(file_path)  # Using Polars to read the CSV
+
+            logger.info(f"Reading data from file: {DATA_FILE}")
+```
 
 In VS Code, open a NEW terminal in your root project folder. Use the commands below to activate .venv, and start the producer. 
 

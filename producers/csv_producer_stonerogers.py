@@ -81,7 +81,7 @@ logger.info(f"Data file: {DATA_FILE}")
 
 def generate_messages(file_path: pathlib.Path):
     """
-    Read from a csv file and yield records one by one, continuously.
+    Read from a csv file and yield records one by one, using polars.
 
     Args:
         file_path (pathlib.Path): Path to the CSV file.
