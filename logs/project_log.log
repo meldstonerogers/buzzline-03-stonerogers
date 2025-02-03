@@ -22655,3 +22655,5 @@
 2025-02-02 21:57:39.210 | INFO     | __main__:main:167 - Sent message to topic 'smoker_csv': {'timestamp': '2025-02-03T03:57:39.210263', 'temperature': 112.8}
 2025-02-02 21:57:44.217 | INFO     | __main__:main:167 - Sent message to topic 'smoker_csv': {'timestamp': '2025-02-03T03:57:44.216195', 'temperature': 113.2}
 2025-02-02 21:57:49.224 | INFO     | __main__:main:167 - Sent message to topic 'smoker_csv': {'timestamp': '2025-02-03T03:57:49.223867', 'temperature': 113.6}
+2025-02-02 21:57:54.230 | INFO     | __main__:main:167 - Sent message to topic 'smoker_csv': {'timestamp': '2025-02-03T03:57:54.229321', 'temperature': 114.0}
+2025-02-02 21:57:59.237 | INFO     | __main__:main:167 - Sent message to topic 'smoker_csv': {'timestamp': '2025-02-03T03:57:59.236469', 'temperature': 114.4}
