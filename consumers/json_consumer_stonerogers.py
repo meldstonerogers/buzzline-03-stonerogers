@@ -1,7 +1,7 @@
 """
-json_consumer_case.py
+json_consumer_stonerogers.py
 
-Consume json messages from a Kafka topic and process them.
+Consume json messages from a Kafka topic and process using Polars.
 
 JSON is a set of key:value pairs. 
 
@@ -20,9 +20,11 @@ Example JSON message (after deserialization) to be analyzed
 # Import packages from Python Standard Library
 import os
 import json  # handle JSON parsing
-from collections import defaultdict  # data structure for counting author occurrences
+# from collections import defaultdict  # data structure for counting author occurrences
+import datetime
 
 # Import external packages
+import polars as pl 
 from dotenv import load_dotenv
 
 # Import functions from local modules
@@ -55,16 +57,16 @@ def get_kafka_consumer_group_id() -> int:
 
 
 #####################################
-# Set up Data Store to hold author counts
+# Set up Polars DataFrame to hold author counts
 #####################################
 
-# Initialize a dictionary to store author counts
-# The defaultdict type initializes counts to 0
-# pass in the int function as the default_factory
-# to ensure counts are integers
-# {author: count} author is the key and count is the value
-author_counts = defaultdict(int)
+# Aggregation using the groupby method
 
+author_df = pl.DataFrame({
+    "author": pl.Series(name="author", dtype=pl.Utf8),
+    "count": pl.Series(name="count", dtype=pl.Int64),
+    "timestamp": pl.Series(name="timestamp", dtype=pl.Datetime)  # Assuming timestamp is DateTime type
+})
 
 #####################################
 # Function to process a single message
@@ -73,11 +75,13 @@ author_counts = defaultdict(int)
 
 def process_message(message: str) -> None:
     """
-    Process a single JSON message from Kafka.
+    Process a single JSON message from Kafka and update Polars DataFrame with timestamps.
 
     Args:
         message (str): The JSON message as a string.
     """
+    global author_df
+
     try:
         # Log the raw message for debugging
         logger.debug(f"Raw message: {message}")
@@ -88,17 +92,34 @@ def process_message(message: str) -> None:
         # Ensure the processed JSON is logged for debugging
         logger.info(f"Processed JSON message: {message_dict}")
 
-        # Ensure it's a dictionary before accessing fields
         if isinstance(message_dict, dict):
-            # Extract the 'author' field from the Python dictionary
+            # Extract the 'author' field from the JSON message
             author = message_dict.get("author", "unknown")
+
+            # Log received author
             logger.info(f"Message received from author: {author}")
 
-            # Increment the count for the author
-            author_counts[author] += 1
+            # Extract the 'timestamp' field, default to None if missing
+            timestamp = message_dict.get("timestamp", None)  # This should be None if missing
+
+            # Log received timestamp (if any)
+            logger.info(f"Message received at timestamp: {timestamp}")
+
+            # Create a new Polars DataFrame entry for this message
+            new_entry = pl.DataFrame({
+                "author": [author], 
+                "count": [1], 
+                "timestamp": [timestamp]  # Now using None for missing timestamp
+            })
+
+            # Append to the existing DataFrame
+            author_df = pl.concat([author_df, new_entry])
+
+            # Aggregate counts using Polars
+            author_df = author_df.groupby("author").agg(pl.col("count").sum().alias("total_count"))
 
             # Log the updated counts
-            logger.info(f"Updated author counts: {dict(author_counts)}")
+            logger.info(f"Updated author counts:\n{author_df}")
         else:
             logger.error(f"Expected a dictionary but got: {type(message_dict)}")
 
