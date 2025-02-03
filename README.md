@@ -140,7 +140,19 @@ python3 -m producers.csv_producer_stonerogers
 
 ## Task 8. Customize a CSV Consumer
 
-Make customizations to the CSV Consumer. I modified in the following way: 
+Make customizations to the CSV Consumer. I modified the code to include a temperature alert system should the tempterature reach 250F. I defined the following: 
+```zsh
+def get_temperature_alert_threshold() -> float:
+    """Fetch temperature alert threshold from environment or use default."""
+    return float(os.getenv("TEMPERATURE_ALERT_THRESHOLD", 250.0))
+```
+I then adjusted the processing function to process temperature for the alert threshold. 
+```zsh
+        # Check for temperature alert
+        alert_threshold = get_temperature_alert_threshold()
+        if temperature >= alert_threshold:
+            logger.critical(f"ALERT! High temperature detected: {temperature}°F at {timestamp}")
+```                
 
 In VS Code, open a NEW terminal in your root project folder. Use the commands below to activate .venv, and start the consumer. 
 
