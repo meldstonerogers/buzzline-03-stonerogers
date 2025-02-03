@@ -1,5 +1,5 @@
 """
-csv_consumer_case.py
+csv_consumer_stonerogers.py
 
 Consume json messages from a Kafka topic and process them.
 
@@ -66,6 +66,10 @@ def get_rolling_window_size() -> int:
     window_size = int(os.getenv("SMOKER_ROLLING_WINDOW_SIZE", 5))
     logger.info(f"Rolling window size: {window_size}")
     return window_size
+
+def get_temperature_alert_threshold() -> float:
+    """Fetch temperature alert threshold from environment or use default."""
+    return float(os.getenv("TEMPERATURE_ALERT_THRESHOLD", 250.0))
 
 
 #####################################
@@ -139,6 +143,11 @@ def process_message(message: str, rolling_window: deque, window_size: int) -> No
             logger.info(
                 f"STALL DETECTED at {timestamp}: Temp stable at {temperature}°F over last {window_size} readings."
             )
+
+        # Check for temperature alert
+        alert_threshold = get_temperature_alert_threshold()
+        if temperature >= alert_threshold:
+            logger.critical(f"ALERT! High temperature detected: {temperature}°F at {timestamp}")
 
     except json.JSONDecodeError as e:
         logger.error(f"JSON decoding error for message '{message}': {e}")
