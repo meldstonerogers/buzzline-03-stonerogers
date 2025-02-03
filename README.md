@@ -1,24 +1,27 @@
-# buzzline-03-case
+# buzzline-03-stonerogers
+Streaming Data, Project 3
+Melissa Stone Rogers, [GitHub](https://github.com/meldstonerogers/buzzline-03-stonerogers)
 
-Streaming data does not have to be simple text.
-Many of us are familiar with streaming video content and audio (e.g. music) files. 
+## Introduction
 
-Streaming data can be structured (e.g. csv files) or
-semi-structured (e.g. json data). 
+This is a professional project using Apache Kafka to create uniquie JSON and CSV producers and consumers to simulate streaming data. Python Version 3.11 was used, as well as Git for version control. 
+This project was forked from Dr. Case's project repository found [here](https://github.com/denisecase/buzzline-03-case). Much of the detailed instructions in this README.md were borrowed from Dr. Case's project specifications, and updated for my machine.
+Commands were used on a Mac machine running zsh.   
+
+Streaming data can be structured (e.g. csv files) or semi-structured (e.g. json data). 
 
 We'll work with two different types of data, and so we'll use two different Kafka topic names. 
 See [.env](.env). 
 
 
-## Task 1. Use Tools from Module 1 and 2
+## Task 1. Use Tools from Previous Repo Specifications 
 
-Before starting, ensure you have completed the setup tasks in <https://github.com/denisecase/buzzline-01-case> and <https://github.com/denisecase/buzzline-02-case> first. 
+Before starting, ensure you have first completed the setup tasks in [Project 1](https://github.com/denisecase/buzzline-01-case) and [Project 2](https://github.com/denisecase/buzzline-02-case), created by Dr. Case. 
 Python 3.11 is required. 
 
 ## Task 2. Copy This Example Project and Rename
 
-Once the tools are installed, copy/fork this project into your GitHub account
-and create your own version of this project to run and experiment with.
+Once the tools are installed, copy/fork this project into your GitHub account and create your own version of this project to run and experiment with.
 Name it `buzzline-03-yourname` where yourname is something unique to you.
 Follow the instructions in [FORK-THIS-REPO.md](https://github.com/denisecase/buzzline-01-case/blob/main/docs/FORK-THIS-REPO.md).
     
@@ -30,6 +33,29 @@ Follow the instructions in [MANAGE-VENV.md](https://github.com/denisecase/buzzli
 2. Activate .venv
 3. Install the required dependencies using requirements.txt.
 
+```zsh
+python3.11 -m venv .venv
+source .venv/bin/activate
+```
+```zsh
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install --upgrade -r requirements.txt
+
+```
+
+Remember, each time a new terminal is opened, activate the .venv. 
+```zsh
+source .venv/bin/activate
+```
+
+### Initial Project Commit 
+Turn on the autosave function in VS Code. Push changes to GitHub freqently to effectively track changes. Update the commit message to a meaningful note for your changes. 
+```zsh
+git add .
+git commit -m "initial"                         
+git push origin main
+```
+
 ## Task 4. Start Zookeeper and Kafka (2 Terminals)
 
 If Zookeeper and Kafka are not already running, you'll need to restart them.
@@ -38,74 +64,70 @@ See instructions at [SETUP-KAFKA.md] to:
 1. Start Zookeeper Service ([link](https://github.com/denisecase/buzzline-02-case/blob/main/docs/SETUP-KAFKA.md#step-7-start-zookeeper-service-terminal-1))
 2. Start Kafka ([link](https://github.com/denisecase/buzzline-02-case/blob/main/docs/SETUP-KAFKA.md#step-8-start-kafka-terminal-2))
 
-## Task 5. Start a JSON Producer
+## Task 5. Customize JSON Producer
 
-In VS Code, open a terminal.
-Use the commands below to activate .venv, and start the producer. 
+Make customizations to the JSON Producer. I modified this code to use polars. I wanted to try using polars to read and handle the JSON data. I adjusted the generate_messages fucntion to utilize polars with the following: 
+```zsh
+def generate_messages(file_path: pathlib.Path):
+    while True:
+        try:
+            logger.info(f"Opening data file: {DATA_FILE}")
 
-Windows:
+            # Read JSON file into a Polars DataFrame
+            df = pl.read_json(DATA_FILE)
 
-```shell
-.venv\Scripts\activate
-py -m producers.json_producer_case
-```
+            # Convert each row to a dictionary and yield
+            for buzz_entry in df.to_dicts():
+                logger.debug(f"Generated JSON: {buzz_entry}")
+                yield buzz_entry
 
-Mac/Linux:
+        except FileNotFoundError:
+            logger.error(f"File not found: {file_path}. Exiting.")
+            sys.exit(1)
+        except Exception as e:
+            logger.error(f"Error processing JSON file with Polars: {e}")
+            sys.exit(3)
+```            
+
+In VS Code, open a terminal. Use the commands below to activate .venv, and start the producer. 
+
 ```zsh
 source .venv/bin/activate
-python3 -m producers.json_producer_case
+python3 -m producers.json_producer_stonerogers
 ```
 
-What did we name the topic used with JSON data? 
-Hint: See the producer code and [.env](.env).
+## Task 6. Customize JSON Consumer
 
-## Task 6. Start a JSON Consumer
+Make customizations to the JSON Consumer. I modified in the following way: 
 
-Consumers process streaming data in real time.
+In VS Code, open a NEW terminal in your root project folder. Use the commands below to activate .venv, and start the consumer. 
 
-In VS Code, open a NEW terminal in your root project folder. 
-Use the commands below to activate .venv, and start the consumer. 
-
-Windows:
-```shell
-.venv\Scripts\activate
-py -m consumers.json_consumer_case
-```
-
-Mac/Linux:
 ```zsh
 source .venv/bin/activate
-python3 -m consumers.json_consumer_case
+python3 -m consumers.json_consumer_stonerogers
 ```
 
-What did we name the topic used with JSON data? 
-Hint: See the consumer code and [.env](.env).
+## Task 7. Customize CSV Producer
 
-## Task 7. Start a CSV Producer
+Make customizations to the CSV Producer. I modified in the following way: 
 
-Follow a similar process to start the csv producer. 
-You will need to:
-1. Open a new terminal. 
-2. Activate your .venv.
-3. Know the command that works on your machine to execute python (e.g. py or python3).
-4. Know how to use the -m (module flag to run your file as a module).
-5. Know the full name of the module you want to run. Hint: Look in the producers folder.
+In VS Code, open a NEW terminal in your root project folder. Use the commands below to activate .venv, and start the producer. 
 
-What did we name the topic used with csv data? 
-Hint: See the producer code and [.env](.env).
+```zsh
+source .venv/bin/activate
+python3 -m producers.csv_producer_stonerogers
+```
 
-## Task 8. Start a CSV Consumer
+## Task 8. Customize a CSV Consumer
 
-Follow a similar process to start the csv consumer. 
-You will need to:
-1. Open a new terminal. 
-2. Activate your .venv.
-3. Know the command that works on your machine to execute python (e.g. py or python3).
-4. Know how to use the -m (module flag to run your file as a module).
-5. Know the full name of the module you want to run. Hint: Look in the consumers folder.
+Make customizations to the CSV Consumer. I modified in the following way: 
 
-What did we name the topic used with csv data? 
-Hint: See the consumer code and [.env](.env).
+In VS Code, open a NEW terminal in your root project folder. Use the commands below to activate .venv, and start the consumer. 
+
+```zsh
+source .venv/bin/activate
+python3 -m consumers.csv_consumer_stonerogers
+```
 
 ## About the Smart Smoker (CSV Example)
 
@@ -135,6 +157,14 @@ When resuming work on this project:
 To save disk space, you can delete the .venv folder when not actively working on this project.
 You can always recreate it, activate it, and reinstall the necessary packages later. 
 Managing Python virtual environments is a valuable skill. 
+
+## Complete Your Project
+Save your project and push back to your repository. 
+```zsh
+git add .
+git commit -m "final"                         
+git push origin main
+```
 
 ## License
 This project is licensed under the MIT License as an example project. 

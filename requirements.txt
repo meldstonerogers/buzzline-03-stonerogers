@@ -97,6 +97,7 @@ numpy
 
 # Data manipulation and analysis
 pandas
+polars
 
 # ======================================================
 # KAFKA MESSAGE BROKER INTEGRATION
