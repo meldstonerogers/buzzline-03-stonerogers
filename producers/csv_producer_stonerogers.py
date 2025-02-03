@@ -1,5 +1,5 @@
 """
-csv_producer_case.py
+csv_producer_stonerogers.py
 
 Stream numeric data to a Kafka topic.
 
@@ -21,6 +21,7 @@ import json  # work with JSON data
 from datetime import datetime  # work with timestamps
 
 # Import external packages
+import polars as pl 
 from dotenv import load_dotenv
 
 # Import functions from local modules
@@ -74,7 +75,7 @@ DATA_FILE = DATA_FOLDER.joinpath("smoker_temps.csv")
 logger.info(f"Data file: {DATA_FILE}")
 
 #####################################
-# Message Generator
+# Message Generator with Polars 
 #####################################
 
 
@@ -91,24 +92,23 @@ def generate_messages(file_path: pathlib.Path):
     while True:
         try:
             logger.info(f"Opening data file in read mode: {DATA_FILE}")
-            with open(DATA_FILE, "r") as csv_file:
-                logger.info(f"Reading data from file: {DATA_FILE}")
+            df = pl.read_csv(file_path)  # Using Polars to read the CSV
 
-                csv_reader = csv.DictReader(csv_file)
-                for row in csv_reader:
-                    # Ensure required fields are present
-                    if "temperature" not in row:
-                        logger.error(f"Missing 'temperature' column in row: {row}")
-                        continue
+            logger.info(f"Reading data from file: {DATA_FILE}")
+            for row in df.iter_rows(named=True):  # Iterate through rows of the DataFrame
+                if "temperature" not in row:
+                    logger.error(f"Missing 'temperature' column in row: {row}")
+                    continue
 
-                    # Generate a timestamp and prepare the message
-                    current_timestamp = datetime.utcnow().isoformat()
-                    message = {
-                        "timestamp": current_timestamp,
-                        "temperature": float(row["temperature"]),
-                    }
-                    logger.debug(f"Generated message: {message}")
-                    yield message
+                # Generate a timestamp and prepare the message
+                current_timestamp = datetime.utcnow().isoformat()
+                message = {
+                    "timestamp": current_timestamp,
+                    "temperature": float(row["temperature"]),
+                }
+                logger.debug(f"Generated message: {message}")
+                yield message
+
         except FileNotFoundError:
             logger.error(f"File not found: {file_path}. Exiting.")
             sys.exit(1)

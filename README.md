@@ -98,7 +98,7 @@ python3 -m producers.json_producer_stonerogers
 
 ## Task 6. Customize JSON Consumer
 
-Make customizations to the JSON Consumer. I modified in the following way: 
+Make customizations to the JSON Consumer. I utilzed polars for data handling. I also added an author count and timestamp column to the DataFrame. 
 
 In VS Code, open a NEW terminal in your root project folder. Use the commands below to activate .venv, and start the consumer. 
 
